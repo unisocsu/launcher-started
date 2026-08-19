@@ -16,6 +16,17 @@ public class LauncherStorage {
 
     private final SharedPreferences preferences;
 
+    public static class SavedItem {
+        public enum Type {
+            APP,
+            FOLDER
+        }
+        public Type type;
+        public String packageName; // used if type == APP
+        public String folderName;  // used if type == FOLDER
+        public List<String> folderApps; // used if type == FOLDER
+    }
+
     public LauncherStorage(Context context) {
 
         preferences =
@@ -41,12 +52,25 @@ public class LauncherStorage {
                                 .getPackageName()
                 );
 
-            } else {
+            } else if (item.isFolder()) {
 
-                /*
-                 * כרגע נשמור את התיקיות בשלב הבא.
-                 */
-                value.append("EMPTY");
+                HomeFolder folder = item.getFolder();
+                String folderName = folder.getName();
+                
+                // Escape delimiters in the folder name to avoid parsing bugs
+                folderName = folderName.replace("|", " ").replace(":", " ");
+
+                value.append("FOLDER:");
+                value.append(folderName);
+                value.append(":");
+
+                List<AppInfo> folderApps = folder.getApps();
+                for (int i = 0; i < folderApps.size(); i++) {
+                    value.append(folderApps.get(i).getPackageName());
+                    if (i < folderApps.size() - 1) {
+                        value.append(",");
+                    }
+                }
             }
 
             value.append("|");
@@ -60,7 +84,7 @@ public class LauncherStorage {
                 .apply();
     }
 
-    public List<String> loadOrder() {
+    public List<SavedItem> loadOrder() {
 
         String value =
                 preferences.getString(
@@ -68,8 +92,8 @@ public class LauncherStorage {
                         ""
                 );
 
-        List<String> result =
-                new ArrayList<String>();
+        List<SavedItem> result =
+                new ArrayList<SavedItem>();
 
         if (value.length() == 0) {
             return result;
@@ -80,11 +104,38 @@ public class LauncherStorage {
 
         for (String entry : entries) {
 
+            if (entry.trim().isEmpty()) {
+                continue;
+            }
+
             if (entry.startsWith("APP:")) {
 
-                result.add(
-                        entry.substring(4)
-                );
+                SavedItem item = new SavedItem();
+                item.type = SavedItem.Type.APP;
+                item.packageName = entry.substring(4);
+                result.add(item);
+
+            } else if (entry.startsWith("FOLDER:")) {
+
+                String rest = entry.substring(7);
+                int firstColon = rest.indexOf(':');
+                if (firstColon != -1) {
+                    String folderName = rest.substring(0, firstColon);
+                    String appsString = rest.substring(firstColon + 1);
+
+                    SavedItem item = new SavedItem();
+                    item.type = SavedItem.Type.FOLDER;
+                    item.folderName = folderName;
+                    item.folderApps = new ArrayList<String>();
+
+                    String[] appPkgs = appsString.split(",");
+                    for (String pkg : appPkgs) {
+                        if (!pkg.trim().isEmpty()) {
+                            item.folderApps.add(pkg);
+                        }
+                    }
+                    result.add(item);
+                }
             }
         }
 

@@ -399,6 +399,38 @@ public class HomeGridView extends GridLayout {
 
                 return false;
 
+            case KeyEvent.KEYCODE_1:
+            case KeyEvent.KEYCODE_2:
+            case KeyEvent.KEYCODE_3:
+            case KeyEvent.KEYCODE_4:
+            case KeyEvent.KEYCODE_5:
+            case KeyEvent.KEYCODE_6:
+            case KeyEvent.KEYCODE_7:
+            case KeyEvent.KEYCODE_8:
+            case KeyEvent.KEYCODE_9: {
+                int digitIndex = keyCode - KeyEvent.KEYCODE_1;
+                if (digitIndex >= 0 && digitIndex < items.size()) {
+                    if (selectedIndex == digitIndex) {
+                        items.get(digitIndex).performClick();
+                    } else {
+                        select(digitIndex);
+                    }
+                }
+                return true;
+            }
+
+            case KeyEvent.KEYCODE_0: {
+                int zeroIndex = 9;
+                if (zeroIndex >= 0 && zeroIndex < items.size()) {
+                    if (selectedIndex == zeroIndex) {
+                        items.get(zeroIndex).performClick();
+                    } else {
+                        select(zeroIndex);
+                    }
+                }
+                return true;
+            }
+
             default:
 
                 return super.onKeyDown(
