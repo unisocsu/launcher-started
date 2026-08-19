@@ -3,22 +3,25 @@
 
     <application
         android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:supportsRtl="true">
 
         <activity
             android:name="kernel.unisocsu.kosherlauncher.MainActivity"
             android:screenOrientation="portrait"
             android:exported="true">
 
+            <!-- הופך את האפליקציה ל-Launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
         </activity>
+
     </application>
 
 </manifest>
