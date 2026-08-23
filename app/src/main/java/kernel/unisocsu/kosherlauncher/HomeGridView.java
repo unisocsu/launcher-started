@@ -290,7 +290,40 @@ public class HomeGridView extends GridLayout {
         view.setBackground(background);
     }
 
+    /*
+     * API 19 COMPATIBLE LAYOUT
+     *
+     * Do not use:
+     *
+     * GridLayout.spec(column, 1, 1f)
+     *
+     * because the API 19 runtime on the target device
+     * fails to resolve that method and throws:
+     *
+     * java.lang.NoSuchMethodError:
+     * android.widget.GridLayout.spec
+     *
+     * Instead, each item gets an explicit width.
+     */
     private void refreshLayout() {
+
+        int screenWidth =
+                getResources()
+                        .getDisplayMetrics()
+                        .widthPixels;
+
+        int margin = 6;
+
+        int totalMargins =
+                margin * 2 * columns;
+
+        int itemWidth =
+                (screenWidth - totalMargins)
+                        / columns;
+
+        if (itemWidth < 1) {
+            itemWidth = 1;
+        }
 
         for (int i = 0;
              i < items.size();
@@ -301,14 +334,23 @@ public class HomeGridView extends GridLayout {
             LayoutParams params =
                     new LayoutParams();
 
-            params.width = 0;
+            /*
+             * Explicit width instead of:
+             *
+             * params.width = 0;
+             * GridLayout.spec(..., 1f)
+             *
+             * This avoids the API 19 crash.
+             */
+            params.width = itemWidth;
             params.height = 120;
 
+            /*
+             * API 19 compatible overload.
+             */
             params.columnSpec =
                     GridLayout.spec(
-                            i % columns,
-                            1,
-                            1f
+                            i % columns
                     );
 
             params.rowSpec =
@@ -317,10 +359,10 @@ public class HomeGridView extends GridLayout {
                     );
 
             params.setMargins(
-                    6,
-                    6,
-                    6,
-                    6
+                    margin,
+                    margin,
+                    margin,
+                    margin
             );
 
             view.setLayoutParams(params);
@@ -370,6 +412,7 @@ public class HomeGridView extends GridLayout {
                 break;
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
+
             case KeyEvent.KEYCODE_ENTER:
 
                 if (moveMode) {
@@ -400,34 +443,66 @@ public class HomeGridView extends GridLayout {
                 return false;
 
             case KeyEvent.KEYCODE_1:
+
             case KeyEvent.KEYCODE_2:
+
             case KeyEvent.KEYCODE_3:
+
             case KeyEvent.KEYCODE_4:
+
             case KeyEvent.KEYCODE_5:
+
             case KeyEvent.KEYCODE_6:
+
             case KeyEvent.KEYCODE_7:
+
             case KeyEvent.KEYCODE_8:
+
             case KeyEvent.KEYCODE_9: {
-                int digitIndex = keyCode - KeyEvent.KEYCODE_1;
-                if (digitIndex >= 0 && digitIndex < items.size()) {
-                    if (selectedIndex == digitIndex) {
-                        items.get(digitIndex).performClick();
+
+                int digitIndex =
+                        keyCode -
+                                KeyEvent.KEYCODE_1;
+
+                if (digitIndex >= 0 &&
+                        digitIndex < items.size()) {
+
+                    if (selectedIndex ==
+                            digitIndex) {
+
+                        items.get(
+                                digitIndex
+                        ).performClick();
+
                     } else {
+
                         select(digitIndex);
                     }
                 }
+
                 return true;
             }
 
             case KeyEvent.KEYCODE_0: {
+
                 int zeroIndex = 9;
-                if (zeroIndex >= 0 && zeroIndex < items.size()) {
-                    if (selectedIndex == zeroIndex) {
-                        items.get(zeroIndex).performClick();
+
+                if (zeroIndex >= 0 &&
+                        zeroIndex < items.size()) {
+
+                    if (selectedIndex ==
+                            zeroIndex) {
+
+                        items.get(
+                                zeroIndex
+                        ).performClick();
+
                     } else {
+
                         select(zeroIndex);
                     }
                 }
+
                 return true;
             }
 
@@ -458,6 +533,7 @@ public class HomeGridView extends GridLayout {
         int to = selectedIndex;
 
         moveMode = false;
+
         movingIndex = -1;
 
         if (from != to &&
